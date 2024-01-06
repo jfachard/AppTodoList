@@ -10,9 +10,7 @@ const register = () => {
   const router = useRouter()
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "white", alignItems: "center" }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white", alignItems: "center" }}>
       <View style={{ marginTop: 80 }}>
         <Text style={{ fontSize: 18, fontWeight: "600", color: "#0E3386" }}>
           TODO-LIST TRACKER
