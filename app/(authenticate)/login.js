@@ -1,13 +1,42 @@
-import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, TextInput, Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
-import { FontAwesome } from '@expo/vector-icons';
-import React, { useState } from "react";
-import { useRouter } from "expo-router";
+import { StyleSheet, Text, View, SafeAreaView, KeyboardAvoidingView, TextInput, Pressable } from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import { FontAwesome } from '@expo/vector-icons'
+import React, { useEffect, useState } from "react"
+import axios from "axios"
+import { useRouter } from "expo-router"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("")
   const router = useRouter()
+
+  useEffect(() => {
+    const checkLoginStatus = async() => {
+        try {
+           const token = await AsyncStorage.getItem("authToken")
+           if(token){
+            router.replace("/(tabs)/home")
+           }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    checkLoginStatus()
+  }, [])
+  const handleLogin = () => {
+    const user = {
+        email:email,
+        password:password,
+    }
+
+    axios.post("http://192.168.1.12:3000/login",user).then((response) => {
+        console.log(response);
+        const token = response.data.token;
+        AsyncStorage.setItem("authToken",token);
+        router.replace("/(tabs)/home")
+    })
+  }
 
   return (
     <SafeAreaView
@@ -80,7 +109,7 @@ const login = () => {
 
           <View style={{marginTop:60}}/>
 
-          <Pressable style={{width:200, backgroundColor:"#0076CE", padding:15, borderRadius:6, marginLeft:"auto", marginRight:"auto"}}>
+          <Pressable onPress={handleLogin} style={{width:200, backgroundColor:"#0076CE", padding:15, borderRadius:6, marginLeft:"auto", marginRight:"auto"}}>
             <Text style={{textAlign:"center", color:"white", fontWeight:"bold", fontSize:16}}>Log In</Text>
           </Pressable>
 
