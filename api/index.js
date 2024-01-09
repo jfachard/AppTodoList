@@ -13,6 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const jwt = require("jsonwebtoken")
+const moment = require("moment")
 
 mongoose
   .connect("mongodb+srv://jean:jean@cluster0.06i1hf1.mongodb.net/")
@@ -77,9 +78,73 @@ app.post("/login",async(req,res) => {
 
         const token = jwt.sign({ userId:user._id }, secretKey)
 
-        res.status(200).json((token))
+        res.status(200).json({token})
     } catch (error) {
         console.log("Login failed", error)
         res.status(500).json({message:"Login failed"})
     }
 })
+
+app.post("/todos/:userId",async(req, res) => {
+    try {
+       const userId = req.params.userId
+       const {title, category} = req.body
+       
+       const newTodo = new Todo({
+            title,
+            category,
+            dueDate:moment().format("YYYY-MM-DD")
+       })
+
+       await newTodo.save()
+
+       const user = await User.findById(userId)
+       if(!user){
+            res.status(404).json({error:"User not found"})
+       }
+       user?.todos.push(newTodo._id)
+       await user.save()
+
+       res.status(200).json({message:"Todo added succesfully", todo: newTodo})
+    } catch (error) {
+        res.status(200).json({message:"Todo not added"})
+    }
+})
+
+app.get("/users/:userId/todos", async (req, res) => {
+    try {
+      const userId = req.params.userId
+  
+      const user = await User.findById(userId).populate("todos")
+      if (!user) {
+        return res.status(404).json({ error: "user not found" })
+      }
+  
+      res.status(200).json({ todos: user.todos })
+    } catch (error) {
+      res.status(500).json({ error: "Something went wrong" })
+    }
+})
+
+app.patch("/todos/:todoId/complete", async (req, res) => {
+    try {
+      const todoId = req.params.todoId
+  
+      const updatedTodo = await Todo.findByIdAndUpdate(
+        todoId,
+        {
+          status: "completed",
+        },
+
+        { new: true }
+      );
+  
+      if (!updatedTodo) {
+        return res.status(404).json({ error: "Todo not found" })
+      }
+  
+      res.status(200).json({ message: "Todo marked as complete", todo: updatedTodo })
+    } catch (error) {
+      res.status(500).json({ error: "Something went wrong" })
+    }
+});
