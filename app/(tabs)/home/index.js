@@ -1,14 +1,19 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
-import { BottomModal, ModalContent, ModalTitle, SlideAnimation, } from "react-native-modals";
+import React, { useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { AntDesign, Ionicons, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { BottomModal, ModalContent, ModalTitle, SlideAnimation } from "react-native-modals";
 import axios from "axios";
+import moment from "moment";
 
 const index = () => {
-  const todos = [];
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [todos, setTodos] = useState([])
+  const today = moment().format("MMM Do")
+  const [isModalVisible, setModalVisible] = useState(false)
   const [category, setCategory] = useState("All")
   const [todo, setTodo] = useState("")
+  const [isPending, setPending] = useState([])
+  const [isCompleted, setCompleted] = useState([])
+  const [markedComplete, setMarkedComplete] = useState(false)
   const suggestions = [
     {
       id: "0",
@@ -16,7 +21,7 @@ const index = () => {
     },
     {
       id: "1",
-      todo: "Go Excercising",
+      todo: "Go to the Gym",
     },
     {
       id: "2",
@@ -28,11 +33,15 @@ const index = () => {
     },
     {
       id: "4",
-      todo: "Go Shopping",
+      todo: "Go to the Mall",
     },
     {
       id: "5",
       todo: "finish assignments",
+    },
+    {
+      id: "6",
+      todo: "Go to the grocery",
     },
   ]
   const addTodo = async() => {
@@ -54,6 +63,41 @@ const index = () => {
       console.log("error", error)
     }
   }
+
+  useEffect(() => {
+    getUserTodos()
+  }, [markedComplete])
+
+  const getUserTodos = async () => {
+    try {
+      const response = await axios.get("http://192.168.1.12:3000/users/659ad9fd3e5c753d793030e4/todos")
+
+      console.log(response.data.todos)
+      setTodos(response.data.todos)
+
+      const fetchedTodos = response.data.todos || [] 
+      const pending = fetchedTodos.filter((todo) => todo.status !== "completed")
+      const completed = fetchedTodos.filter((todo) => todo.status === "completed")
+
+      setPending(pending)
+      setCompleted(completed)
+    } catch (error) {
+      console.log("error", error)
+    }
+  }
+
+  const markAsCompleted = async(todoId) => {
+    try {
+      setMarkedComplete(true)
+      const response = await axios.patch(`http://192.168.1.12:3000/todos/${todoId}/complete`)
+      console.log(response.data)
+    } catch (error) {
+      console.log("error",error)
+    }
+  }
+
+  console.log("completed", isCompleted)
+  console.log("pending", isPending)
   return (
     <>
       <View
@@ -110,7 +154,68 @@ const index = () => {
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ padding: 10 }}>
           {todos?.length > 0 ? (
-            <View></View>
+            <View>
+              {isPending?.length > 0 && <Text>To Do {today}</Text>}
+
+              {isPending?.map((item, index) => (
+                <Pressable
+                  style={{
+                    backgroundColor: "#E0E0E0",
+                    padding: 10,
+                    borderRadius: 7,
+                    marginVertical: 10,
+                  }}
+                  key={index}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <Entypo onPress={() => markAsCompleted(item?.id)} name="circle" size={18} color="black" />
+                    <Text style={{ flex: 1 }}>{item?.title}</Text>
+                    <Feather name="flag" size={20} color="black" />
+                  </View>
+                </Pressable>
+              ))}
+
+              {isCompleted?.length > 0 && (
+                <View>
+                  <View style={{justifyContent:"center", alignItems:"center", margin:10}}>
+                    <Image style={{ width: 100, height: 100}} source={{uri: "https://cdn-icons-png.flaticon.com/128/6784/678455.png"}}/>
+                  </View>
+                  <View style={{flexDirection:"row", alignItems:"center", gap:5, marginVertical:10}}>
+                    <Text>Task complete</Text>
+                    <MaterialIcons name="arrow-drop-down" size={24} color="black" />
+                  </View>
+                  {isCompleted?.map((item, index) => (
+                    <Pressable
+                      style={{
+                        backgroundColor: "#E0E0E0",
+                        padding: 10,
+                        borderRadius: 7,
+                        marginVertical: 10,
+                      }}
+                      key={index}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <Entypo name="circle" size={18} color="black" />
+                        <Text style={{ flex: 1, textDecorationLine:"line-through", color:"gray" }}>{item?.title}</Text>
+                        <Feather name="flag" size={20} color="gray" />
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+            </View>
           ) : (
             <View
               style={{
@@ -232,10 +337,27 @@ const index = () => {
             </Pressable>
           </View>
           <Text>Some suggestions:</Text>
-          <View style={{flexDirection:"row", alignItems:"center", gap:10, flexWrap:"wrap", marginVertical:10}}>
-            {suggestions?.map((item,index) => (
-              <Pressable onPress={() => setTodo(item?.todo)} style={{backgroundColor:"#F0F8FF", paddingHorizontal:10, paddingVertical:4, borderRadius:25}} key={index}>
-                <Text style={{textAlign:"center"}}>{item?.todo}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+              marginVertical: 10,
+            }}
+          >
+            {suggestions?.map((item, index) => (
+              <Pressable
+                onPress={() => setTodo(item?.todo)}
+                style={{
+                  backgroundColor: "#F0F8FF",
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  borderRadius: 25,
+                }}
+                key={index}
+              >
+                <Text style={{ textAlign: "center" }}>{item?.todo}</Text>
               </Pressable>
             ))}
           </View>
