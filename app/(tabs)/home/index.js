@@ -174,7 +174,7 @@ const index = () => {
                       gap: 10,
                     }}
                   >
-                    <Entypo onPress={() => markAsCompleted(item?.id)} name="circle" size={18} color="black" />
+                    <Entypo onPress={() => markAsCompleted(item?._id)} name="circle" size={18} color="black" />
                     <Text style={{ flex: 1 }}>{item?.title}</Text>
                     <Feather name="flag" size={20} color="black" />
                   </View>
@@ -184,7 +184,7 @@ const index = () => {
               {isCompleted?.length > 0 && (
                 <View>
                   <View style={{justifyContent:"center", alignItems:"center", margin:10}}>
-                    <Image style={{ width: 100, height: 100}} source={{uri: "https://cdn-icons-png.flaticon.com/128/6784/678455.png"}}/>
+                    <Image style={{ width: 100, height: 100}} source={{uri: "https://cdn-icons-png.flaticon.com/128/6784/6784655.png"}}/>
                   </View>
                   <View style={{flexDirection:"row", alignItems:"center", gap:5, marginVertical:10}}>
                     <Text>Task complete</Text>
