@@ -148,3 +148,38 @@ app.patch("/todos/:todoId/complete", async (req, res) => {
       res.status(500).json({ error: "Something went wrong" })
     }
 });
+
+app.get("/todos/completed/:date", async(req,res) => {
+  try {
+    const date = req.params.date
+
+    const completedTodos = await Todo.find({
+      status:"completed",
+      createdAt:{
+        $gte: new Date(`${date}T00:00:00.000Z`),
+        $lt: new Date(`${date}T23:59:59.999Z`),
+      }
+    }).exec()
+
+    res.status(200).json({ completedTodos })
+  } catch (error) {
+    res.status(500).json({error:"Error"})
+  }
+})
+
+app.get("/todos/count", async(req,res) => {
+  try {
+
+    const totalCompletedTask = await Todo.countDocuments({
+      status:"completed"
+    }).exec()
+
+    const totalPendingTask = await Todo.countDocuments({
+      status:"pending"
+    }).exec()
+
+    res.status(200).json({totalCompletedTask, totalPendingTask})
+  } catch (error) {
+    res.status(500).json({error:"Network error"})
+  }
+})

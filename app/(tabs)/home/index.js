@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { AntDesign, Ionicons, Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, Entypo, Feather, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { BottomModal, ModalContent, ModalTitle, SlideAnimation } from "react-native-modals";
 import axios from "axios";
 import moment from "moment";
@@ -57,6 +57,7 @@ const index = () => {
         console.log("error", error)
       })
 
+      await getUserTodos()
       setModalVisible(false)
       setTodo("")
     } catch (error) {
@@ -66,7 +67,7 @@ const index = () => {
 
   useEffect(() => {
     getUserTodos()
-  }, [markedComplete])
+  }, [markedComplete, isModalVisible])
 
   const getUserTodos = async () => {
     try {
@@ -207,7 +208,7 @@ const index = () => {
                           gap: 10,
                         }}
                       >
-                        <Entypo name="circle" size={18} color="black" />
+                        <FontAwesome name="circle" size={18} color="gray" />
                         <Text style={{ flex: 1, textDecorationLine:"line-through", color:"gray" }}>{item?.title}</Text>
                         <Feather name="flag" size={20} color="gray" />
                       </View>
