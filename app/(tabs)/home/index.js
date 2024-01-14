@@ -4,8 +4,10 @@ import { AntDesign, Ionicons, Entypo, Feather, MaterialIcons, FontAwesome } from
 import { BottomModal, ModalContent, ModalTitle, SlideAnimation } from "react-native-modals";
 import axios from "axios";
 import moment from "moment";
+import { useRouter } from "expo-router";
 
 const index = () => {
+  const router = useRouter()
   const [todos, setTodos] = useState([])
   const today = moment().format("MMM Do")
   const [isModalVisible, setModalVisible] = useState(false)
@@ -112,7 +114,7 @@ const index = () => {
       >
         <Pressable
           style={{
-            backgroundColor: "#7CB9E8",
+            backgroundColor: "#929292",
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: 25,
@@ -124,7 +126,7 @@ const index = () => {
         </Pressable>
         <Pressable
           style={{
-            backgroundColor: "#7CB9E8",
+            backgroundColor: "#929292",
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: 25,
@@ -136,7 +138,7 @@ const index = () => {
         </Pressable>
         <Pressable
           style={{
-            backgroundColor: "#7CB9E8",
+            backgroundColor: "#929292",
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: 25,
@@ -148,7 +150,7 @@ const index = () => {
           <Text style={{ color: "white", textAlign: "center" }}>Personal</Text>
         </Pressable>
         <Pressable onPress={() => setModalVisible(!isModalVisible)}>
-          <AntDesign name="pluscircle" size={30} color="#007FFF" />
+          <AntDesign name="pluscircle" size={30} color="black" />
         </Pressable>
       </View>
 
@@ -160,6 +162,18 @@ const index = () => {
 
               {isPending?.map((item, index) => (
                 <Pressable
+                  onPress={() => {
+                    router?.push({
+                      pathname: "/home/info",
+                      params: {
+                        id: item._id,
+                        title: item?.title,
+                        category: item?.category,
+                        createdAt: item?.createdAt,
+                        dueDate: item?.dueDate,
+                      },
+                    });
+                  }}
                   style={{
                     backgroundColor: "#E0E0E0",
                     padding: 10,
@@ -175,7 +189,12 @@ const index = () => {
                       gap: 10,
                     }}
                   >
-                    <Entypo onPress={() => markAsCompleted(item?._id)} name="circle" size={18} color="black" />
+                    <Entypo
+                      onPress={() => markAsCompleted(item?._id)}
+                      name="circle"
+                      size={18}
+                      color="black"
+                    />
                     <Text style={{ flex: 1 }}>{item?.title}</Text>
                     <Feather name="flag" size={20} color="black" />
                   </View>
@@ -184,12 +203,34 @@ const index = () => {
 
               {isCompleted?.length > 0 && (
                 <View>
-                  <View style={{justifyContent:"center", alignItems:"center", margin:10}}>
-                    <Image style={{ width: 100, height: 100}} source={{uri: "https://cdn-icons-png.flaticon.com/128/6784/6784655.png"}}/>
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      margin: 10,
+                    }}
+                  >
+                    <Image
+                      style={{ width: 100, height: 100 }}
+                      source={{
+                        uri: "https://cdn-icons-png.flaticon.com/128/6784/6784655.png",
+                      }}
+                    />
                   </View>
-                  <View style={{flexDirection:"row", alignItems:"center", gap:5, marginVertical:10}}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 5,
+                      marginVertical: 10,
+                    }}
+                  >
                     <Text>Task complete</Text>
-                    <MaterialIcons name="arrow-drop-down" size={24} color="black" />
+                    <MaterialIcons
+                      name="arrow-drop-down"
+                      size={24}
+                      color="black"
+                    />
                   </View>
                   {isCompleted?.map((item, index) => (
                     <Pressable
@@ -209,7 +250,15 @@ const index = () => {
                         }}
                       >
                         <FontAwesome name="circle" size={18} color="gray" />
-                        <Text style={{ flex: 1, textDecorationLine:"line-through", color:"gray" }}>{item?.title}</Text>
+                        <Text
+                          style={{
+                            flex: 1,
+                            textDecorationLine: "line-through",
+                            color: "gray",
+                          }}
+                        >
+                          {item?.title}
+                        </Text>
                         <Feather name="flag" size={20} color="gray" />
                       </View>
                     </Pressable>
@@ -248,7 +297,7 @@ const index = () => {
                 onPress={() => setModalVisible(!isModalVisible)}
                 style={{ marginTop: 15 }}
               >
-                <AntDesign name="pluscircle" size={30} color="#007FFF" />
+                <AntDesign name="pluscircle" size={30} color="black" />
               </Pressable>
             </View>
           )}
